@@ -16,9 +16,12 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-    - name: Connect and Pull
+    - name: Create and Run Script
       run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull"
+        echo "cd ${{ secrets.WORK_DIR }}" > pull_script.sh
+        echo "git checkout ${{ secrets.MAIN_BRANCH }}" >> pull_script.sh
+        echo "git pull" >> pull_script.sh
+        chmod +x pull_script.sh
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "./pull_script.sh"
     - name: Cleanup
-      run: rm -rf ~/.ssh
-
+      run: rm -rf ~/.ssh pull_script.sh
