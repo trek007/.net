@@ -18,8 +18,11 @@ jobs:
         ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
     - name: Create and Run Script
       run: |
-        echo "cd \"${{ secrets.WORK_DIR }}\"" > pull_script.sh
-        echo "git checkout \"${{ secrets.MAIN_BRANCH }}\"" >> pull_script.sh
+        WORK_DIR="${{ secrets.WORK_DIR }}"
+        MAIN_BRANCH="${{ secrets.MAIN_BRANCH }}"
+        
+        echo "cd \"$WORK_DIR\"" > pull_script.sh
+        echo "git checkout \"$MAIN_BRANCH\"" >> pull_script.sh
         echo "git pull" >> pull_script.sh
         chmod +x pull_script.sh
         cat pull_script.sh  # Display the script content for debugging
