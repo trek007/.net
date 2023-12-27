@@ -3,29 +3,21 @@ on:
     branches:
       - main
   workflow_dispatch:
-
+  
 jobs:
   run_pull:
-    name: Run Pull
+    name: run pull
     runs-on: ubuntu-latest
     
     steps:
-    - name: Install SSH keys
+    - name: install ssh keys
+      # check this thread to understand why its needed:
+      # https://stackoverflow.com/a/70447517
       run: |
-        mkdir -p ~/.ssh
+        install -m 600 -D /dev/null ~/.ssh/id_rsa
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-    - name: Create and Run Script
-      run: |
-        WORK_DIR="${{ secrets.WORK_DIR }}"
-        MAIN_BRANCH="${{ secrets.MAIN_BRANCH }}"
-        
-        echo "cd \"$WORK_DIR\"" > pull_script.sh
-        echo "git checkout \"$MAIN_BRANCH\"" >> pull_script.sh
-        echo "git pull" >> pull_script.sh
-        chmod +x pull_script.sh
-        cat pull_script.sh  # Display the script content for debugging
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "./pull_script.sh"
-    - name: Cleanup
-      run: rm -rf ~/.ssh pull_script.sh
+        ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
+    - name: connect and pull
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull && exit"
+    - name: cleanup
+      run: rm -rf ~/.ssh
