@@ -17,6 +17,14 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
         ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
     - name: connect and pull
-      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull && exit"
+      uses: appleboy/ssh-action@master
+      #run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull && exit"
+      host: ${{ secrets.SSH_HOST }}
+      key: ${{ secrets.SSH_PRIVATE_KEY }}
+      port: 22
+      script: |
+        cd ${{ secrets.WORK_DIR }}
+        git pull origin 
+        git status
     - name: cleanup
       run: rm -rf ~/.ssh
